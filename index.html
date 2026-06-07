@@ -344,6 +344,7 @@ let SR       = new Set();  // selected region items
 let SI       = new Set();  // selected issues: "Category: sub-item" strings
 let lineName = '';          // from LIFF profile
 let ID_TOKEN = '';          // LINE ID token, sent to the backend for verification
+let liffLocked = false;     // true once the LINE identity locks the name field
 
 // ── Backend API (fetch) ────────────────────────────────────────────────────────
 // GET  → GAS_URL?action=getRecords | getStats
@@ -379,6 +380,21 @@ async function init() {
   // Pre-fill staffname from cache immediately — field is always visible
   var snEl = document.getElementById('staffname');
   if (snEl && cachedName && !snEl.value) snEl.value = cachedName;
+
+  // Defensive lock: some mobile LINE in-app webviews don't fully enforce the
+  // readOnly *property*, so also cancel the underlying edit events once the
+  // field is locked to the LINE identity. 'beforeinput' covers typing, IME,
+  // voice, autofill and paste on all modern webviews; the rest are belt-and-
+  // suspenders. (This page is the LIFF page; the Apps Script page has none of
+  // this, so that entry point stays fully editable.)
+  if (snEl) {
+    ['beforeinput', 'paste', 'cut', 'drop'].forEach(function (ev) {
+      snEl.addEventListener(ev, function (e) { if (liffLocked) e.preventDefault(); });
+    });
+    snEl.addEventListener('focus', function () {
+      if (liffLocked) { try { snEl.blur(); } catch (e) {} }
+    });
+  }
   upd();
 
   initLiff();
@@ -394,11 +410,14 @@ function setLiffName(name) {
   if (snEl) {
     snEl.value = name;
     // Opened via LIFF → the logger identity is the verified LINE user, so the
-    // field is locked. (The Apps Script /exec page never calls this, so that
-    // entry point stays fully editable.)
+    // field is locked. Set both the property and the attribute, flip the guard
+    // flag (see init), and drop focus so no mobile keyboard stays open.
+    liffLocked = true;
     snEl.readOnly = true;
+    snEl.setAttribute('readonly', 'readonly');
     snEl.style.opacity = '0.7';
     snEl.style.cursor = 'not-allowed';
+    try { snEl.blur(); } catch(e) {}
   }
   try { sessionStorage.setItem('ir_name', name); } catch(e) {}
   var pill = document.getElementById('userpill');
