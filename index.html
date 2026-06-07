@@ -391,12 +391,20 @@ async function init() {
 function setLiffName(name) {
   lineName = name;
   var snEl = document.getElementById('staffname');
-  if (snEl) snEl.value = name;
+  if (snEl) {
+    snEl.value = name;
+    // Opened via LIFF → the logger identity is the verified LINE user, so the
+    // field is locked. (The Apps Script /exec page never calls this, so that
+    // entry point stays fully editable.)
+    snEl.readOnly = true;
+    snEl.style.opacity = '0.7';
+    snEl.style.cursor = 'not-allowed';
+  }
   try { sessionStorage.setItem('ir_name', name); } catch(e) {}
   var pill = document.getElementById('userpill');
   if (pill) { pill.textContent = name; pill.style.display = ''; }
   var noteEl = document.getElementById('name-note');
-  if (noteEl) noteEl.textContent = '\u2713 Auto-filled from your LINE display name.';
+  if (noteEl) noteEl.textContent = '\u2713 Locked to your LINE display name.';
   upd();
 }
 
