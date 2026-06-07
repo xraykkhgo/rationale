@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imaging Rationale</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+/* ── Variables ─────────────────────────────────────────────────────── */
+:root{
+  --bg:#f0efee;--card:#fff;--bg2:#f7f6f5;
+  --txt:#1a1a18;--txt2:#555551;--txt3:#9b9b97;
+  --bdr:rgba(0,0,0,.13);--bdr2:rgba(0,0,0,.28);
+  --ct-bg:#fef3e2;--ct-txt:#7c3400;--ct-bdr:#c96000;
+  --mri-bg:#e8f0fe;--mri-txt:#1a3a8a;--mri-bdr:#2955c8;
+  --reg-bg:#e8f9ee;--reg-txt:#155a2e;--reg-bdr:#1a8040;
+  --flg-bg:#fdeef0;--flg-txt:#8b0f23;--flg-bdr:#c8182e;
+  --ok-bg:#e8f9ee;--ok-txt:#155a2e;--ok-bdr:#1a8040;
+  --rad:10px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--card:#1d1d1b;--bg2:#252522;
+  --txt:#e8e8e4;--txt2:#a0a09c;--txt3:#656560;
+  --bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.28);
+  --ct-bg:#3d1900;--ct-txt:#ffb860;--ct-bdr:#b05000;
+  --mri-bg:#0a1840;--mri-txt:#90b8ff;--mri-bdr:#2050c0;
+  --reg-bg:#032010;--reg-txt:#70e090;--reg-bdr:#138040;
+  --flg-bg:#3a0510;--flg-txt:#ff8898;--flg-bdr:#a01020;
+  --ok-bg:#032010;--ok-txt:#70e090;--ok-bdr:#138040;
+}}
+
+/* ── Reset ─────────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;font-size:16px;background:var(--bg);color:var(--txt);line-height:1.55}
+body{max-width:640px;margin:0 auto;padding:14px 14px 90px}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hdr-title{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.user-pill{font-size:13px;background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;padding:5px 12px;color:var(--txt2);display:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Stats chips ────────────────────────────────────────────────────── */
+.stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.stat{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;font-size:14px;color:var(--txt2)}
+.stat strong{color:var(--txt);font-weight:600}
+
+/* ── Tab navigation ─────────────────────────────────────────────────── */
+.tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--bdr);padding-bottom:12px}
+.tab{padding:10px 18px;border-radius:var(--rad);border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:15px;cursor:pointer;font-family:inherit;min-height:46px;font-weight:400}
+.tab.on{background:var(--card);color:var(--txt);font-weight:600;border-color:var(--bdr2)}
+
+/* ── Section cards ──────────────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:14px}
+.card-hd{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:16px;padding-bottom:12px;border-bottom:1.5px solid var(--bdr)}
+.sec{margin-bottom:16px}
+.sec:last-child{margin-bottom:0}
+
+/* ── Form labels ────────────────────────────────────────────────────── */
+.lbl{font-size:14px;font-weight:600;color:var(--txt2);display:block;margin-bottom:8px}
+.req{color:var(--flg-txt);margin-left:2px}
+.opt{font-size:13px;color:var(--txt3);font-weight:400}
+
+/* ── Text inputs ────────────────────────────────────────────────────── */
+input[type=text],input[type=date]{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--bdr);border-radius:var(--rad);
+  background:var(--bg2);color:var(--txt);
+  font-size:16px;font-family:inherit;outline:none;
+  min-height:52px;-webkit-appearance:none;appearance:none;
+}
+input[type=text]:focus,input[type=date]:focus{border-color:var(--bdr2);background:var(--card)}
+textarea{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--bdr);border-radius:var(--rad);
+  background:var(--bg2);color:var(--txt);
+  font-size:16px;font-family:inherit;outline:none;
+  resize:vertical;line-height:1.55;
+}
+textarea:focus{border-color:var(--bdr2);background:var(--card)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── Modality ────────────────────────────────────────────────────────── */
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{padding:14px 10px;border-radius:var(--rad);border:1.5px solid var(--bdr);background:var(--bg2);color:var(--txt2);font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;text-align:center;width:100%;min-height:54px}
+.seg:hover{border-color:var(--bdr2)}
+.s-ct{background:var(--ct-bg)!important;color:var(--ct-txt)!important;border-color:var(--ct-bdr)!important;font-weight:700!important}
+.s-mri{background:var(--mri-bg)!important;color:var(--mri-txt)!important;border-color:var(--mri-bdr)!important;font-weight:700!important}
+
+/* ── Referral unit grid ──────────────────────────────────────────────── */
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ref-btn{
+  padding:12px 10px;border-radius:var(--rad);
+  border:1.5px solid var(--bdr);background:var(--bg2);color:var(--txt2);
+  font-size:15px;font-weight:400;cursor:pointer;font-family:inherit;
+  text-align:center;min-height:52px;line-height:1.3;
+  display:flex;align-items:center;justify-content:center;
+}
+.ref-btn:hover{border-color:var(--bdr2);color:var(--txt)}
+.ref-btn.sel{background:var(--ct-bg)!important;color:var(--ct-txt)!important;border-color:var(--ct-bdr)!important;font-weight:700!important}
+.ref-full{grid-column:span 2}
+
+/* ── Region / Issue group tabs ──────────────────────────────────────── */
+.gtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.gtabs::-webkit-scrollbar{display:none}
+.gtab{font-size:14px;padding:8px 14px;border-radius:var(--rad);border:1.5px solid var(--bdr);background:var(--bg2);color:var(--txt2);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;min-height:42px;font-weight:400}
+.gtab:hover{border-color:var(--bdr2)}
+.gtab.on{background:var(--card);color:var(--txt);font-weight:600;border-color:var(--bdr2)}
+
+/* ── Item chips (region & issue) ────────────────────────────────────── */
+.ri-grid{display:flex;flex-wrap:wrap;gap:6px;min-height:50px;align-content:flex-start}
+.ri{padding:9px 13px;border-radius:var(--rad);border:1.5px solid var(--bdr);background:var(--bg2);color:var(--txt2);font-size:14px;cursor:pointer;font-family:inherit;text-align:left;min-height:42px;display:inline-flex;align-items:center}
+.ri:hover{border-color:var(--bdr2);color:var(--txt)}
+.ri.sel{background:var(--reg-bg)!important;color:var(--reg-txt)!important;border-color:var(--reg-bdr)!important;font-weight:600!important}
+.ri.isel{background:var(--flg-bg)!important;color:var(--flg-txt)!important;border-color:var(--flg-bdr)!important;font-weight:600!important}
+.other-row{display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+
+/* ── Summary badge rows ─────────────────────────────────────────────── */
+.sum-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:6px}
+.badge{font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;display:inline-block;line-height:1.3}
+.b-ct{background:var(--ct-bg);color:var(--ct-txt)}
+.b-mri{background:var(--mri-bg);color:var(--mri-txt)}
+.b-reg{background:var(--reg-bg);color:var(--reg-txt)}
+.b-iss{background:var(--flg-bg);color:var(--flg-txt);font-size:12px}
+
+/* ── Log button ─────────────────────────────────────────────────────── */
+.log-btn{width:100%;padding:18px;border-radius:14px;border:2px solid var(--bdr);background:var(--bg2);color:var(--txt3);font-size:18px;font-weight:500;cursor:not-allowed;font-family:inherit;letter-spacing:.01em}
+.log-btn.ok{background:var(--ok-bg);color:var(--ok-txt);border-color:var(--ok-bdr);cursor:pointer;font-weight:700}
+
+/* ── Utilities ──────────────────────────────────────────────────────── */
+.hidden{display:none}
+.nc{font-size:13px;color:var(--txt3);text-align:right;margin-top:5px}
+
+/* ── Records table ──────────────────────────────────────────────────── */
+.rec-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.rec-toolbar input{flex:1;min-width:160px}
+.tbl-wrap{overflow-x:auto;border-radius:var(--rad);border:1px solid var(--bdr)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:600;color:var(--txt2);border-bottom:1.5px solid var(--bdr);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bdr);vertical-align:top;font-size:14px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.tag-wrap{display:flex;flex-wrap:wrap;gap:4px}
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<div class="hdr">
+  <h1 class="hdr-title">Imaging Rationale</h1>
+  <span class="user-pill" id="userpill"></span>
+</div>
+
+<!-- ── Stats ───────────────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat">Today: <strong id="std">—</strong></div>
+  <div class="stat">This week: <strong id="swk">—</strong></div>
+  <div class="stat">Total: <strong id="stot">—</strong></div>
+</div>
+
+<!-- ── Tabs ────────────────────────────────────────────────────────────── -->
+<div class="tabs">
+  <button class="tab on" id="tl" onclick="ST('log')">Log new case</button>
+  <button class="tab"    id="tr" onclick="ST('rec')">All records (<span id="rcn">0</span>)</button>
+</div>
+
+<!-- ════════════ LOG PANEL ════════════════════════════════════════════════ -->
+<div id="pl">
+
+  <!-- ── Logged-as card: always visible; LIFF pre-fills when available ──── -->
+  <div class="card" id="name-card">
+    <p class="card-hd">Logged as<span class="req">*</span></p>
+    <input type="text" id="staffname"
+      placeholder="Your name (auto-filled from LINE when opened via LIFF)…"
+      oninput="cacheStaffName(); upd()"/>
+    <p id="name-note" style="font-size:13px;color:var(--txt3);margin-top:8px">
+      Opening via the LINE LIFF URL will auto-fill your LINE display name.
+    </p>
+    <p id="liff-diag" style="font-size:11px;color:var(--txt3);margin-top:6px;
+       font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;
+       opacity:.75;display:none"></p>
+  </div>
+
+  <!-- ── Card 1: Patient & referral info ──────────────────────────────── -->
+  <div class="card">
+    <p class="card-hd">Patient &amp; referral info</p>
+
+    <!-- HN + Study date -->
+    <div class="sec row2">
+      <div>
+        <label class="lbl" for="hn">HN<span class="req">*</span></label>
+        <input type="text" id="hn" inputmode="numeric" placeholder="Hospital number…" oninput="upd()"/>
+      </div>
+      <div>
+        <label class="lbl" for="sd">Study date<span class="req">*</span></label>
+        <input type="date" id="sd" oninput="upd()"/>
+      </div>
+    </div>
+
+    <!-- Referral unit -->
+    <div class="sec">
+      <p class="lbl">Referral unit <span class="opt">— optional</span></p>
+      <div class="ref-grid" id="rufgrid">
+        <!-- populated by initRefGrid() -->
+      </div>
+      <div id="ruotherwrap" class="hidden" style="margin-top:10px">
+        <input type="text" id="ruothertxt" placeholder="Specify referral unit…"/>
+      </div>
+    </div>
+
+    <!-- Referral staff -->
+    <div class="sec">
+      <label class="lbl" for="refstaff">Referral staff <span class="opt">— optional</span></label>
+      <input type="text" id="refstaff" placeholder="Referring physician or staff name…"/>
+    </div>
+  </div>
+
+  <!-- ── Card 2: Imaging study ─────────────────────────────────────────── -->
+  <div class="card">
+    <p class="card-hd">Imaging study</p>
+
+    <!-- Modality -->
+    <div class="sec">
+      <p class="lbl">Modality<span class="req">*</span></p>
+      <div class="mod-grid">
+        <button class="seg" id="mCT"  onclick="selM('CT')">CT</button>
+        <button class="seg" id="mMRI" onclick="selM('MRI')">MRI</button>
+      </div>
+    </div>
+
+    <!-- Body region / Protocol -->
+    <div class="sec">
+      <p class="lbl">Body region / Protocol <span class="opt">— optional · multi-select</span></p>
+      <p id="rpr" style="font-size:14px;color:var(--txt3);padding:4px 0">Select modality first</p>
+      <div id="rsel" class="hidden">
+        <div class="gtabs" id="gtabs"></div>
+        <div class="ri-grid" id="ritems"></div>
+        <div class="other-row">
+          <button class="ri" id="robtn" onclick="togRO()">Other</button>
+          <span style="font-size:13px;color:var(--txt3)">free text if not listed</span>
+        </div>
+        <div id="rowrap" class="hidden" style="margin-top:8px">
+          <input type="text" id="rotxt" placeholder="Describe region / protocol…"/>
+        </div>
+        <div class="sum-row" id="rsum"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Card 3: Issue ──────────────────────────────────────────────────── -->
+  <div class="card">
+    <p class="card-hd">Issue <span style="font-size:13px;font-weight:400;color:var(--txt3)">— optional · multi-select</span></p>
+    <div class="gtabs" id="itabs"></div>
+    <div class="ri-grid" id="iitems"></div>
+    <div id="oiwrap" class="hidden" style="margin-top:8px">
+      <input type="text" id="oitxt" placeholder="Describe other issue…" oninput="rIS()"/>
+    </div>
+    <div class="sum-row" id="isum"></div>
+  </div>
+
+  <!-- ── Card 4: Explanation ───────────────────────────────────────────── -->
+  <div class="card">
+    <p class="card-hd">Explanation <span style="font-size:13px;font-weight:400;color:var(--txt3)">— optional, max 1000 chars</span></p>
+    <textarea id="expl" rows="4" maxlength="1000"
+      placeholder="Clinical context, referrer details, relevant history, observations…"
+      oninput="updN()"></textarea>
+    <p class="nc" id="nc">0 / 1000</p>
+  </div>
+
+  <!-- ── Submit ────────────────────────────────────────────────────────── -->
+  <button class="log-btn" id="lbtn" onclick="doLog()">Log case</button>
+  <p id="fls"    style="display:none;text-align:center;padding:10px;font-size:15px;color:var(--ok-txt);font-weight:600">✓ Logged successfully</p>
+  <p id="errmsg" style="display:none;text-align:center;padding:10px;font-size:14px;color:var(--flg-txt)"></p>
+</div>
+
+<!-- ════════════ RECORDS PANEL ════════════════════════════════════════════ -->
+<div id="pr" class="hidden">
+  <div class="rec-toolbar">
+    <input type="text" id="srch" placeholder="Search HN, modality, protocol, issue, referral…" oninput="filterRecs()"/>
+    <span style="font-size:14px;color:var(--txt2);align-self:center" id="rcount"></span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date / Time</th>
+          <th>HN &amp; Referral</th>
+          <th>Mod</th>
+          <th>Protocols</th>
+          <th>Issues</th>
+          <th>Explanation</th>
+          <th>By</th>
+        </tr>
+      </thead>
+      <tbody id="rlist"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  CONFIG — FILL IN THESE TWO VALUES, THEN SAVE                              ║
+// ║                                                                            ║
+// ║  GAS_URL : your Apps Script Web App URL, ending in /exec                   ║
+// ║            (Apps Script editor → Deploy → Manage deployments → copy URL)   ║
+// ║  LIFF_ID : your LIFF ID, e.g. 1234567890-AbCdEfGh                          ║
+// ║            (LINE Developers Console → your channel → LIFF tab)             ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbymB6LG4dZZtmLzDTxtKw3B6kt9VLAnDK_p-f10rg8-n8993VAnfUAhLuKzAcObVjKd/exec';
+const LIFF_ID = '2010292984-Eh6LWGEB';
+
+// ── Embedded reference data (edit lists in Apps Script Code.gs; mirror here) ──
+const REF_UNITS = ['Surgery','Medicine','Orthopedics','Emergency medicine','OB-GYN','Pediatrics','ENT','Ophthalmology','Rehabilitation','Family medicine','Psychiatry','Radiology','Other (specify)'];
+
+const CG = {
+  'Head & Neck': ['Brain','Facial bone','PNS','Orbits','Temporal bone','Neck','CTA brain','CTA neck','Multiphase CTA brain','Perfusion CT brain','CTV brain'],
+  'Body': ['Chest','Chest low dose','HRCT chest','CTPA','Upper abdomen','Lower abdomen','Whole abdomen','KUB','Cystography'],
+  'CTA / CTV': ['CTA whole aorta','CTA thoracic aorta','CTA abdominal aorta','CTA renal artery','CTV abdomen','CTA run-off upper extremity','CTA run-off lower extremity','CTV extremity'],
+  'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity'],
+  'Subspecialty': ['CTA coronary','CTA cardiac','CT calcium score','CT colonography','CT enterography'],
+};
+
+const MG = {
+  'Neuro': ['Brain','Hippocampus','Pituitary','IAC','Orbits','Cranial nerves','PNS','Pharynx','Neck','MRA brain','MRA carotid','MRV brain','MR perfusion brain','MR spectroscopy brain'],
+  'Body': ['Upper abdomen','MRCP','Lower abdomen / pelvis','Fistula in ano','Prostate gland','Uterus','Cervix','Whole abdomen','Urography','MRA upper abdomen','MRA lower abdomen','MRA whole abdomen','MRA renal artery','MRV abdomen'],
+  'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity','Small part / tumor'],
+  'Others': ['Breast','Fetus / uterus (pregnancy)','Chest','Cardiac'],
+};
+
+const ISSUE_DATA = {
+  'Request appropriateness': ['Mismatch clinical concern to modality','Contrast material not indicated','Over investigation (study parts)','Over investigation (frequency)','Stepwise imaging ignorance','Imaging risk/maleficence outweigh benefit'],
+  'Emergency dilemma': ['No literal evidence of emergency','Pre-operative elective case (exclusive reason)','Oncologic staging (exclusive reason)'],
+  'Patient safety': ['Missing renal function status','Missing contrast allergy status','Missing pregnancy status (premenopausal)','Inadequate patient preparation'],
+  'Document failure': ['Incomplete request (no diagnosis, inadequate information)','Unintentionally wrong request','Duplicate request of the same condition','Missing informed consent (if required)','Complicated handwriting'],
+  'Others': [],
+};
+
+// ── App state ─────────────────────────────────────────────────────────────────
+let allRecs  = [];
+let mod      = null;    // 'CT' | 'MRI' | null
+let ag       = null;    // active region group tab
+let aig      = null;    // active issue group tab
+let refUnit  = null;    // selected referral unit string | null
+let SR       = new Set();  // selected region items
+let SI       = new Set();  // selected issues: "Category: sub-item" strings
+let lineName = '';          // from LIFF profile
+let ID_TOKEN = '';          // LINE ID token, sent to the backend for verification
+
+// ── Backend API (fetch) ────────────────────────────────────────────────────────
+// GET  → GAS_URL?action=getRecords | getStats
+// POST → GAS_URL  with JSON body sent as text/plain (a CORS "simple request").
+async function apiGet(action) {
+  const url = GAS_URL + (GAS_URL.indexOf('?') >= 0 ? '&' : '?') + 'action=' + encodeURIComponent(action);
+  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+  return await res.json();
+}
+async function apiPost(data) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    redirect: 'follow',
+    body: JSON.stringify(data),
+  });
+  return await res.json();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  document.getElementById('sd').value = new Date().toISOString().slice(0, 10);
+
+  initRefGrid();
+
+  aig = Object.keys(ISSUE_DATA)[0];
+  rIT(); rII();
+
+  // ── Resolve display name ─────────────────────────────────────────────────
+  var cachedName = '';
+  try { cachedName = sessionStorage.getItem('ir_name') || ''; } catch(e) {}
+
+  // Pre-fill staffname from cache immediately — field is always visible
+  var snEl = document.getElementById('staffname');
+  if (snEl && cachedName && !snEl.value) snEl.value = cachedName;
+  upd();
+
+  initLiff();
+
+  await loadStats();
+  await loadRecords();
+}
+
+// Called when LIFF successfully provides the LINE display name
+function setLiffName(name) {
+  lineName = name;
+  var snEl = document.getElementById('staffname');
+  if (snEl) snEl.value = name;
+  try { sessionStorage.setItem('ir_name', name); } catch(e) {}
+  var pill = document.getElementById('userpill');
+  if (pill) { pill.textContent = name; pill.style.display = ''; }
+  var noteEl = document.getElementById('name-note');
+  if (noteEl) noteEl.textContent = '\u2713 Auto-filled from your LINE display name.';
+  upd();
+}
+
+function diag(msg) {
+  var d = document.getElementById('liff-diag');
+  if (d) { d.style.display = ''; d.textContent = 'LIFF: ' + msg; }
+}
+
+// ── LIFF (top-level page — initializes normally, unlike inside an iframe) ──────
+function initLiff() {
+  if (!LIFF_ID || LIFF_ID.indexOf('PASTE') === 0) {
+    diag('LIFF_ID not configured — type your name above.');
+    return;
+  }
+  diag('initializing\u2026');
+  liff.init({ liffId: LIFF_ID })
+    .then(function() {
+      if (!liff.isLoggedIn()) {
+        // External browser (not inside LINE): start the LINE login redirect.
+        // Inside LINE's in-app browser this branch is normally skipped.
+        diag('not logged in \u2192 redirecting to LINE login\u2026');
+        liff.login();
+        return;
+      }
+      try { ID_TOKEN = liff.getIDToken() || ''; } catch(e) {}
+
+      // Fastest path: the display name is already in the ID token payload.
+      var tok = null;
+      try { tok = liff.getDecodedIDToken(); } catch(e) {}
+      if (tok && tok.name) { diag('name from ID token \u2713'); setLiffName(tok.name); return; }
+
+      // Otherwise request the profile scope (if needed) and read the profile.
+      return resolveProfile();
+    })
+    .catch(function(err) {
+      var m = err && err.message ? err.message : String(err);
+      diag('init error: ' + m + ' \u2014 type your name above.');
+    });
+}
+
+function resolveProfile() {
+  function getProf() {
+    return liff.getProfile()
+      .then(function(p) {
+        try { ID_TOKEN = liff.getIDToken() || ID_TOKEN; } catch(e) {}
+        if (p && p.displayName) { diag('name from profile \u2713'); setLiffName(p.displayName); }
+        else { diag('no name returned \u2014 type your name above.'); }
+      })
+      .catch(function(e) {
+        var m = e && e.message ? e.message : String(e);
+        diag('getProfile: ' + m + ' \u2014 type your name above.');
+      });
+  }
+  if (liff.permission && typeof liff.permission.requestAll === 'function') {
+    diag('requesting profile permission\u2026');
+    return liff.permission.requestAll().then(getProf).catch(getProf);
+  }
+  return getProf();
+}
+
+// ── Stats & Records ───────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    var s = await apiGet('getStats');
+    document.getElementById('std').textContent  = s.today;
+    document.getElementById('swk').textContent  = s.week;
+    document.getElementById('stot').textContent = s.total;
+  } catch (e) {}
+}
+
+async function loadRecords() {
+  document.getElementById('rlist').innerHTML =
+    '<tr><td colspan="7" style="color:var(--txt3);text-align:center;padding:24px">Loading…</td></tr>';
+  try {
+    allRecs = await apiGet('getRecords');
+    document.getElementById('rcn').textContent = allRecs.length;
+    filterRecs();
+  } catch (e) {
+    document.getElementById('rlist').innerHTML =
+      '<tr><td colspan="7" style="color:var(--flg-txt);text-align:center;padding:24px">Failed to load: ' + e.message + '</td></tr>';
+  }
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function ST(t) {
+  var L = t === 'log';
+  document.getElementById('pl').className = L ? '' : 'hidden';
+  document.getElementById('pr').className = L ? 'hidden' : '';
+  document.getElementById('tl').className = 'tab' + (L ? ' on' : '');
+  document.getElementById('tr').className = 'tab' + (L ? '' : ' on');
+  if (!L) filterRecs();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  REFERRAL UNIT
+// ════════════════════════════════════════════════════════════════════════════
+function initRefGrid() {
+  var grid = document.getElementById('rufgrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  REF_UNITS.forEach(function(u) {
+    var b = document.createElement('button');
+    b.className = 'ref-btn' + (u === 'Other (specify)' ? ' ref-full' : '');
+    b.textContent = u;
+    b.onclick = function() { selRU(u); };
+    grid.appendChild(b);
+  });
+}
+
+function selRU(u) {
+  refUnit = (refUnit === u) ? null : u;
+  var btns = document.querySelectorAll('#rufgrid .ref-btn');
+  btns.forEach(function(b) {
+    b.className = b.textContent === 'Other (specify)'
+      ? ('ref-btn ref-full' + (b.textContent === refUnit ? ' sel' : ''))
+      : ('ref-btn' + (b.textContent === refUnit ? ' sel' : ''));
+  });
+  var ow = document.getElementById('ruotherwrap');
+  if (ow) ow.className = (refUnit === 'Other (specify)') ? '' : 'hidden';
+  if (refUnit !== 'Other (specify)') {
+    var ot = document.getElementById('ruothertxt');
+    if (ot) ot.value = '';
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  REGION SELECTOR
+// ════════════════════════════════════════════════════════════════════════════
+function GG() { return mod === 'CT' ? CG : mod === 'MRI' ? MG : null; }
+
+function selM(m) {
+  mod = (mod === m) ? null : m;
+  document.getElementById('mCT').className  = 'seg' + (mod === 'CT'  ? ' s-ct'  : '');
+  document.getElementById('mMRI').className = 'seg' + (mod === 'MRI' ? ' s-mri' : '');
+  SR.clear(); ag = null;
+  document.getElementById('rowrap').className = 'hidden';
+  document.getElementById('rotxt').value = '';
+  rRS(); upd();
+}
+
+function rRS() {
+  var G = GG();
+  document.getElementById('rpr').style.display = G ? 'none' : '';
+  document.getElementById('rsel').className     = G ? '' : 'hidden';
+  if (!G) return;
+  var gn = Object.keys(G);
+  if (!ag || gn.indexOf(ag) === -1) ag = gn[0];
+  rGT(G); rRI(G); rS2();
+}
+
+function rGT(G) {
+  var c = document.getElementById('gtabs'); c.innerHTML = '';
+  Object.keys(G).forEach(function(gn) {
+    var cnt = G[gn].filter(function(it) { return SR.has(it); }).length;
+    var b = document.createElement('button');
+    b.className = 'gtab' + (gn === ag ? ' on' : '');
+    b.textContent = gn;
+    if (cnt > 0) {
+      var sp = document.createElement('span');
+      sp.style.cssText = 'background:var(--reg-bg);color:var(--reg-txt);border-radius:10px;padding:2px 7px;font-size:12px;font-weight:700;margin-left:6px';
+      sp.textContent = cnt; b.appendChild(sp);
+    }
+    b.onclick = function() { ag = gn; rGT(G); rRI(G); };
+    c.appendChild(b);
+  });
+}
+
+function rRI(G) {
+  var c = document.getElementById('ritems'); c.innerHTML = '';
+  (G[ag] || []).forEach(function(it) {
+    var b = document.createElement('button');
+    b.className = 'ri' + (SR.has(it) ? ' sel' : '');
+    b.textContent = it;
+    b.onclick = function() { SR.has(it) ? SR.delete(it) : SR.add(it); rGT(G); rRI(G); rS2(); };
+    c.appendChild(b);
+  });
+  document.getElementById('robtn').className = 'ri' + (SR.has('Other') ? ' sel' : '');
+}
+
+function rS2() {
+  var c = document.getElementById('rsum'); c.innerHTML = '';
+  SR.forEach(function(r) {
+    var sp = document.createElement('span');
+    sp.className = 'badge b-reg'; sp.style.cursor = 'pointer';
+    sp.appendChild(document.createTextNode(r + ' '));
+    var x = document.createElement('span'); x.style.opacity = '.5'; x.textContent = '×';
+    sp.appendChild(x); sp.onclick = function() { rmR(r); }; c.appendChild(sp);
+  });
+}
+
+function rmR(r) {
+  SR.delete(r);
+  if (r === 'Other') {
+    document.getElementById('rowrap').className = 'hidden';
+    document.getElementById('rotxt').value = '';
+  }
+  document.getElementById('robtn').className = 'ri' + (SR.has('Other') ? ' sel' : '');
+  var G = GG(); if (G) { rGT(G); rRI(G); } rS2();
+}
+
+function togRO() {
+  if (SR.has('Other')) {
+    SR.delete('Other');
+    document.getElementById('rowrap').className = 'hidden';
+    document.getElementById('rotxt').value = '';
+  } else {
+    SR.add('Other');
+    document.getElementById('rowrap').className = '';
+    setTimeout(function() { document.getElementById('rotxt').focus(); }, 40);
+  }
+  document.getElementById('robtn').className = 'ri' + (SR.has('Other') ? ' sel' : '');
+  rS2();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ISSUE SELECTOR
+// ════════════════════════════════════════════════════════════════════════════
+function rIT() {
+  var c = document.getElementById('itabs'); c.innerHTML = '';
+  Object.keys(ISSUE_DATA).forEach(function(cat) {
+    var items = ISSUE_DATA[cat];
+    var cnt   = items.filter(function(it) { return SI.has(cat + ': ' + it); }).length;
+    var b = document.createElement('button');
+    b.className = 'gtab' + (cat === aig ? ' on' : '');
+    b.textContent = cat;
+    if (cnt > 0) {
+      var sp = document.createElement('span');
+      sp.style.cssText = 'background:var(--flg-bg);color:var(--flg-txt);border-radius:10px;padding:2px 7px;font-size:12px;font-weight:700;margin-left:6px';
+      sp.textContent = cnt; b.appendChild(sp);
+    }
+    b.onclick = function() { aig = cat; rIT(); rII(); };
+    c.appendChild(b);
+  });
+}
+
+function rII() {
+  var c   = document.getElementById('iitems'); c.innerHTML = '';
+  var oiw = document.getElementById('oiwrap');
+  if (!aig) { oiw.className = 'hidden'; return; }
+  var items = ISSUE_DATA[aig];
+  if (items.length === 0) { oiw.className = ''; return; }
+  oiw.className = 'hidden';
+  items.forEach(function(item) {
+    var key = aig + ': ' + item;
+    var b = document.createElement('button');
+    b.className = 'ri' + (SI.has(key) ? ' isel' : '');
+    b.textContent = item;
+    b.onclick = function() { SI.has(key) ? SI.delete(key) : SI.add(key); rIT(); rII(); rIS(); };
+    c.appendChild(b);
+  });
+}
+
+function rIS() {
+  var c = document.getElementById('isum'); c.innerHTML = '';
+  SI.forEach(function(iss) {
+    var sp = document.createElement('span');
+    sp.className = 'badge b-iss'; sp.style.cursor = 'pointer';
+    var label = iss.indexOf(': ') !== -1 ? iss.split(': ').slice(1).join(': ') : iss;
+    sp.appendChild(document.createTextNode(label + ' '));
+    var x = document.createElement('span'); x.style.opacity = '.5'; x.textContent = '×';
+    sp.appendChild(x);
+    sp.onclick = function() { SI.delete(iss); rIT(); rII(); rIS(); };
+    c.appendChild(sp);
+  });
+  var oit = document.getElementById('oitxt');
+  if (oit && oit.value.trim()) {
+    var sp2 = document.createElement('span');
+    sp2.className = 'badge b-iss';
+    var txt = oit.value.trim();
+    sp2.textContent = 'Others: ' + (txt.length > 35 ? txt.slice(0, 35) + '…' : txt);
+    c.appendChild(sp2);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FORM UTILITIES
+// ════════════════════════════════════════════════════════════════════════════
+function updN() {
+  var n = document.getElementById('expl');
+  document.getElementById('nc').textContent = n.value.length + ' / 1000';
+}
+
+// Persists manually typed name across the session so the user types it only once
+function cacheStaffName() {
+  try {
+    var v = document.getElementById('staffname').value.trim();
+    if (v) sessionStorage.setItem('ir_name', v);
+  } catch(e) {}
+}
+
+function upd() {
+  var ok = !!(
+    document.getElementById('hn') && document.getElementById('hn').value.trim() &&
+    document.getElementById('sd') && document.getElementById('sd').value &&
+    mod
+  );
+  document.getElementById('lbtn').className = 'log-btn' + (ok ? ' ok' : '');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SUBMIT
+// ════════════════════════════════════════════════════════════════════════════
+async function doLog() {
+  var hn = document.getElementById('hn').value.trim();
+  var sd = document.getElementById('sd').value;
+  if (!hn || !sd || !mod) return;
+
+  var ruOther = document.getElementById('ruothertxt') ? document.getElementById('ruothertxt').value.trim() : '';
+  var ru = (refUnit === 'Other (specify)') ? (ruOther || 'Other') : (refUnit || '');
+
+  // Refresh the ID token right before sending so the server can verify it.
+  try { if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.isLoggedIn()) ID_TOKEN = liff.getIDToken() || ID_TOKEN; } catch(e) {}
+
+  // Logger name: the visible field is the source of truth (LIFF pre-fills it).
+  var staffEl    = document.getElementById('staffname');
+  var displayName = (staffEl && staffEl.value.trim()) ? staffEl.value.trim()
+                  : (lineName || '');
+
+  var data = {
+    idToken     : ID_TOKEN || '',         // server verifies → trusted "Logged by"
+    loggedBy    : displayName || 'Unknown', // fallback if token absent/unverifiable
+    hn          : hn,
+    studyDate   : sd,
+    refUnit     : ru,
+    refStaff    : (document.getElementById('refstaff').value.trim() || ''),
+    modality    : mod,
+    regions     : Array.from(SR),
+    otherRegion : SR.has('Other') ? (document.getElementById('rotxt').value.trim() || '') : '',
+    issues      : Array.from(SI),
+    otherIssue  : (document.getElementById('oitxt').value.trim() || ''),
+    explanation : (document.getElementById('expl').value.trim() || ''),
+  };
+
+  var btn = document.getElementById('lbtn');
+  var fls = document.getElementById('fls');
+  var err = document.getElementById('errmsg');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  fls.style.display = 'none'; err.style.display = 'none';
+
+  try {
+    var result = await apiPost(data);
+
+    if (result.ok) {
+      // If the server verified the LINE token, reflect the trusted name.
+      if (result.loggedBy && result.loggedBy !== 'Unknown') setLiffName(result.loggedBy);
+
+      // ── Reset form ──
+      document.getElementById('hn').value    = '';
+      document.getElementById('expl').value  = '';
+      document.getElementById('rotxt').value = '';
+      document.getElementById('oitxt').value = '';
+      document.getElementById('refstaff').value = '';
+      document.getElementById('ruothertxt').value = '';
+      document.getElementById('sd').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('rowrap').className  = 'hidden';
+      document.getElementById('oiwrap').className  = 'hidden';
+      document.getElementById('ruotherwrap').className = 'hidden';
+      document.getElementById('nc').textContent = '0 / 1000';
+
+      // Reset referral unit buttons
+      refUnit = null;
+      document.querySelectorAll('#rufgrid .ref-btn').forEach(function(b) {
+        b.className = b.classList.contains('ref-full') ? 'ref-btn ref-full' : 'ref-btn';
+      });
+
+      // Keep modality for faster consecutive entries; clear regions/issues
+      SR.clear(); SI.clear();
+      var G = GG(); if (G) { rGT(G); rRI(G); rS2(); }
+      aig = Object.keys(ISSUE_DATA)[0];
+      rIT(); rII(); rIS();
+      upd();
+
+      fls.style.display = 'block';
+      btn.textContent   = '✓ Logged';
+
+      // Optimistic update: increment badge immediately so it feels instant
+      var prev = parseInt(document.getElementById('rcn').textContent, 10) || 0;
+      document.getElementById('rcn').textContent = prev + 1;
+
+      // Background reload to sync accurate count and stats (non-blocking)
+      loadStats();
+      apiGet('getRecords').then(function(recs) {
+        allRecs = recs;
+        document.getElementById('rcn').textContent = recs.length;
+      }).catch(function() {});
+
+      setTimeout(function() {
+        fls.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = 'Log case';
+        document.getElementById('hn').focus();
+      }, 2200);
+
+    } else {
+      err.textContent = result.error || 'Save failed';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Log case';
+    }
+  } catch (e) {
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Log case';
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  RECORDS TABLE
+// ════════════════════════════════════════════════════════════════════════════
+function filterRecs() {
+  var q = (document.getElementById('srch') ? document.getElementById('srch').value : '').toLowerCase();
+  var filtered = q ? allRecs.filter(function(r) {
+    return [r.hn, r.modality, r.protocols, r.issues, r.explanation, r.loggedBy, r.refUnit, r.refStaff]
+      .some(function(v) { return (v || '').toLowerCase().indexOf(q) !== -1; });
+  }) : allRecs;
+  document.getElementById('rcount').textContent =
+    filtered.length + ' record' + (filtered.length !== 1 ? 's' : '');
+  renderRecs(filtered);
+}
+
+function renderRecs(recs) {
+  var tb = document.getElementById('rlist');
+  if (!recs.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="color:var(--txt3);text-align:center;padding:28px;font-size:14px">No records found</td></tr>';
+    return;
+  }
+  tb.innerHTML = '';
+  recs.forEach(function(r) {
+    var prots = r.protocols ? r.protocols.split('; ').filter(Boolean) : [];
+    var isss  = r.issues    ? r.issues.split('; ').filter(Boolean)    : [];
+    var protB = prots.map(function(p)  { return '<span class="badge b-reg">' + p + '</span>'; }).join(' ');
+    var issB  = isss.map(function(iss) {
+      var label = iss.indexOf(': ') !== -1 ? iss.split(': ').slice(1).join(': ') : iss;
+      return '<span class="badge b-iss">' + label + '</span>';
+    }).join(' ');
+    var orB  = r.otherReg   ? '<span class="badge b-reg">+ ' + r.otherReg   + '</span>' : '';
+    var oiB  = r.otherIssue ? '<span class="badge b-iss">+ ' + r.otherIssue + '</span>' : '';
+    var refInfo = [r.refUnit, r.refStaff].filter(Boolean).join(' · ');
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="white-space:nowrap;color:var(--txt2)">' + r.date + '<br>' + r.time + '</td>' +
+      '<td><span style="font-weight:600">' + r.hn + '</span>' +
+        '<br><span style="font-size:13px;color:var(--txt2)">' + r.studyDate + '</span>' +
+        (refInfo ? '<br><span style="font-size:13px;color:var(--ct-txt)">' + refInfo + '</span>' : '') +
+      '</td>' +
+      '<td><span class="badge ' + (r.modality === 'CT' ? 'b-ct' : 'b-mri') + '">' + r.modality + '</span></td>' +
+      '<td><div class="tag-wrap">' + protB + orB + '</div></td>' +
+      '<td><div class="tag-wrap">' + issB + oiB + '</div></td>' +
+      '<td style="color:var(--txt2);max-width:130px;word-break:break-word">' + (r.explanation || '—') + '</td>' +
+      '<td style="color:var(--txt2);white-space:nowrap">' + r.loggedBy + '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
