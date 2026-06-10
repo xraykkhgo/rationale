@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,6 +13,10 @@
   --bdr:rgba(0,0,0,.13);--bdr2:rgba(0,0,0,.28);
   --ct-bg:#fef3e2;--ct-txt:#7c3400;--ct-bdr:#c96000;
   --mri-bg:#e8f0fe;--mri-txt:#1a3a8a;--mri-bdr:#2955c8;
+  --us-bg:#e0f7f5;--us-txt:#0f5e59;--us-bdr:#0f9b8e;
+  --br-bg:#fde8f3;--br-txt:#8a1259;--br-bdr:#c81e7e;
+  --fl-bg:#efe8fd;--fl-txt:#4a1d8a;--fl-bdr:#6b2fc8;
+  --fm-bg:#eceef1;--fm-txt:#2f3b4a;--fm-bdr:#5b6b80;
   --reg-bg:#e8f9ee;--reg-txt:#155a2e;--reg-bdr:#1a8040;
   --flg-bg:#fdeef0;--flg-txt:#8b0f23;--flg-bdr:#c8182e;
   --ok-bg:#e8f9ee;--ok-txt:#155a2e;--ok-bdr:#1a8040;
@@ -24,6 +28,10 @@
   --bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.28);
   --ct-bg:#3d1900;--ct-txt:#ffb860;--ct-bdr:#b05000;
   --mri-bg:#0a1840;--mri-txt:#90b8ff;--mri-bdr:#2050c0;
+  --us-bg:#032e2b;--us-txt:#5fe0d6;--us-bdr:#0f9b8e;
+  --br-bg:#3a0522;--br-txt:#ff88c0;--br-bdr:#c81e7e;
+  --fl-bg:#1a0a3a;--fl-txt:#b890ff;--fl-bdr:#6b2fc8;
+  --fm-bg:#1a2230;--fm-txt:#9fb0c4;--fm-bdr:#5b6b80;
   --reg-bg:#032010;--reg-txt:#70e090;--reg-bdr:#138040;
   --flg-bg:#3a0510;--flg-txt:#ff8898;--flg-bdr:#a01020;
   --ok-bg:#032010;--ok-txt:#70e090;--ok-bdr:#138040;
@@ -85,6 +93,10 @@ textarea:focus{border-color:var(--bdr2);background:var(--card)}
 .seg:hover{border-color:var(--bdr2)}
 .s-ct{background:var(--ct-bg)!important;color:var(--ct-txt)!important;border-color:var(--ct-bdr)!important;font-weight:700!important}
 .s-mri{background:var(--mri-bg)!important;color:var(--mri-txt)!important;border-color:var(--mri-bdr)!important;font-weight:700!important}
+.s-us{background:var(--us-bg)!important;color:var(--us-txt)!important;border-color:var(--us-bdr)!important;font-weight:700!important}
+.s-br{background:var(--br-bg)!important;color:var(--br-txt)!important;border-color:var(--br-bdr)!important;font-weight:700!important}
+.s-fl{background:var(--fl-bg)!important;color:var(--fl-txt)!important;border-color:var(--fl-bdr)!important;font-weight:700!important}
+.s-fm{background:var(--fm-bg)!important;color:var(--fm-txt)!important;border-color:var(--fm-bdr)!important;font-weight:700!important}
 
 /* ── Referral unit grid ──────────────────────────────────────────────── */
 .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -119,6 +131,10 @@ textarea:focus{border-color:var(--bdr2);background:var(--card)}
 .badge{font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;display:inline-block;line-height:1.3}
 .b-ct{background:var(--ct-bg);color:var(--ct-txt)}
 .b-mri{background:var(--mri-bg);color:var(--mri-txt)}
+.b-us{background:var(--us-bg);color:var(--us-txt)}
+.b-br{background:var(--br-bg);color:var(--br-txt)}
+.b-fl{background:var(--fl-bg);color:var(--fl-txt)}
+.b-fm{background:var(--fm-bg);color:var(--fm-txt)}
 .b-reg{background:var(--reg-bg);color:var(--reg-txt)}
 .b-iss{background:var(--flg-bg);color:var(--flg-txt);font-size:12px}
 
@@ -221,10 +237,7 @@ tr:hover td{background:var(--bg2)}
     <!-- Modality -->
     <div class="sec">
       <p class="lbl">Modality<span class="req">*</span></p>
-      <div class="mod-grid">
-        <button class="seg" id="mCT"  onclick="selM('CT')">CT</button>
-        <button class="seg" id="mMRI" onclick="selM('MRI')">MRI</button>
-      </div>
+      <div class="mod-grid" id="modgrid"></div>
     </div>
 
     <!-- Body region / Protocol -->
@@ -306,25 +319,45 @@ tr:hover td{background:var(--bg2)}
 // ║            (LINE Developers Console → your channel → LIFF tab)             ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbymB6LG4dZZtmLzDTxtKw3B6kt9VLAnDK_p-f10rg8-n8993VAnfUAhLuKzAcObVjKd/exec';
-const LIFF_ID = '2010292984-Eh6LWGEB';
+const LIFF_ID = '2010292984-bt9CF9OP';
 
 // ── Embedded reference data (edit lists in Apps Script Code.gs; mirror here) ──
 const REF_UNITS = ['Surgery','Medicine','Orthopedics','Emergency medicine','OB-GYN','Pediatrics','ENT','Ophthalmology','Rehabilitation','Family medicine','Psychiatry','Radiology','Other (specify)'];
 
-const CG = {
-  'Head & Neck': ['Brain','Facial bone','PNS','Orbits','Temporal bone','Neck','CTA brain','CTA neck','Multiphase CTA brain','Perfusion CT brain','CTV brain'],
-  'Body': ['Chest','Chest low dose','HRCT chest','CTPA','Upper abdomen','Lower abdomen','Whole abdomen','KUB','Cystography'],
-  'CTA / CTV': ['CTA whole aorta','CTA thoracic aorta','CTA abdominal aorta','CTA renal artery','CTV abdomen','CTA run-off upper extremity','CTA run-off lower extremity','CTV extremity'],
-  'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity'],
-  'Subspecialty': ['CTA coronary','CTA cardiac','CT calcium score','CT colonography','CT enterography'],
+// Modality → protocol groups (tap-to-choose order). Keep identical to Code.gs.
+const MODALITY_GROUPS = {
+  'CT': {
+    'Head & Neck': ['Brain','Facial bone','PNS','Orbits','Temporal bone','Neck','CTA brain','CTA neck','Multiphase CTA brain','Perfusion CT brain','CTV brain'],
+    'Body': ['Chest','Chest low dose','HRCT chest','CTPA','Upper abdomen','Lower abdomen','Whole abdomen','KUB','Cystography'],
+    'CTA / CTV': ['CTA whole aorta','CTA thoracic aorta','CTA abdominal aorta','CTA renal artery','CTV abdomen','CTA run-off upper extremity','CTA run-off lower extremity','CTV extremity'],
+    'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity'],
+    'Subspecialty': ['CTA coronary','CTA cardiac','CT calcium score','CT colonography','CT enterography'],
+  },
+  'MRI': {
+    'Neuro': ['Brain','Hippocampus','Pituitary','IAC','Orbits','Cranial nerves','PNS','Pharynx','Neck','MRA brain','MRA carotid','MRV brain','MR perfusion brain','MR spectroscopy brain'],
+    'Body': ['Upper abdomen','MRCP','Lower abdomen / pelvis','Fistula in ano','Prostate gland','Uterus','Cervix','Whole abdomen','Urography','MRA upper abdomen','MRA lower abdomen','MRA whole abdomen','MRA renal artery','MRV abdomen'],
+    'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity','Small part / tumor'],
+    'Others': ['Breast','Fetus / uterus (pregnancy)','Chest','Cardiac'],
+  },
+  'US': {
+    'Grayscale': ['Upper abdomen','Lower abdomen','Whole abdomen','KUB'],
+    'Doppler': ['Lower extremity','Upper extremity','Renal artery (native)','Renal artery (transplanted)','Abdomen','Carotid'],
+    'Small part': ['Brain','Thyroid/Neck','MSK/Soft tissue'],
+  },
+  'Breast': {
+    'Breast': ['MMG+US','MMG only','US only','Breast intervention'],
+  },
+  'Fluoroscopy': {
+    'GI/HPB': ['Upper GI study','Esophagogram','Long GI study','Barium enema','Loopogram','T-tube cholangiography','Intussusception reduction'],
+    'GU': ['IVP','VCUG/cystography','Antegrade pyelography','Hysterosalpingography'],
+  },
+  'Film': {
+    'Film': ['Head and neck','Chest','Abdomen/KUB','Pelvis/Hip','Spine','Extremities','Bone age','Bone survey'],
+  },
 };
-
-const MG = {
-  'Neuro': ['Brain','Hippocampus','Pituitary','IAC','Orbits','Cranial nerves','PNS','Pharynx','Neck','MRA brain','MRA carotid','MRV brain','MR perfusion brain','MR spectroscopy brain'],
-  'Body': ['Upper abdomen','MRCP','Lower abdomen / pelvis','Fistula in ano','Prostate gland','Uterus','Cervix','Whole abdomen','Urography','MRA upper abdomen','MRA lower abdomen','MRA whole abdomen','MRA renal artery','MRV abdomen'],
-  'MSK': ['C-spine','T-spine','TL-spine','LS-spine','Whole spine','Upper extremity','Lower extremity','Small part / tumor'],
-  'Others': ['Breast','Fetus / uterus (pregnancy)','Chest','Cardiac'],
-};
+const MODALITIES = Object.keys(MODALITY_GROUPS);
+const MOD_CLASS = { 'CT':'s-ct','MRI':'s-mri','US':'s-us','Breast':'s-br','Fluoroscopy':'s-fl','Film':'s-fm' };
+const MOD_BADGE = { 'CT':'b-ct','MRI':'b-mri','US':'b-us','Breast':'b-br','Fluoroscopy':'b-fl','Film':'b-fm' };
 
 const ISSUE_DATA = {
   'Request appropriateness': ['Mismatch clinical concern to modality','Contrast material not indicated','Over investigation (study parts)','Over investigation (frequency)','Stepwise imaging ignorance','Imaging risk/maleficence outweigh benefit'],
@@ -369,6 +402,7 @@ async function init() {
   document.getElementById('sd').value = new Date().toISOString().slice(0, 10);
 
   initRefGrid();
+  initModGrid();
 
   aig = Object.keys(ISSUE_DATA)[0];
   rIT(); rII();
@@ -552,12 +586,29 @@ function selRU(u) {
 // ════════════════════════════════════════════════════════════════════════════
 //  REGION SELECTOR
 // ════════════════════════════════════════════════════════════════════════════
-function GG() { return mod === 'CT' ? CG : mod === 'MRI' ? MG : null; }
+function GG() { return MODALITY_GROUPS[mod] || null; }
+
+// Build the modality buttons from MODALITIES (called once in init).
+function initModGrid() {
+  var g = document.getElementById('modgrid');
+  if (!g) return;
+  g.innerHTML = '';
+  MODALITIES.forEach(function(m) {
+    var b = document.createElement('button');
+    b.className = 'seg';
+    b.id = 'm_' + m;
+    b.textContent = m;
+    b.onclick = function() { selM(m); };
+    g.appendChild(b);
+  });
+}
 
 function selM(m) {
   mod = (mod === m) ? null : m;
-  document.getElementById('mCT').className  = 'seg' + (mod === 'CT'  ? ' s-ct'  : '');
-  document.getElementById('mMRI').className = 'seg' + (mod === 'MRI' ? ' s-mri' : '');
+  MODALITIES.forEach(function(x) {
+    var b = document.getElementById('m_' + x);
+    if (b) b.className = 'seg' + (mod === x ? ' ' + (MOD_CLASS[x] || 's-ct') : '');
+  });
   SR.clear(); ag = null;
   document.getElementById('rowrap').className = 'hidden';
   document.getElementById('rotxt').value = '';
@@ -868,7 +919,7 @@ function renderRecs(recs) {
         '<br><span style="font-size:13px;color:var(--txt2)">' + r.studyDate + '</span>' +
         (refInfo ? '<br><span style="font-size:13px;color:var(--ct-txt)">' + refInfo + '</span>' : '') +
       '</td>' +
-      '<td><span class="badge ' + (r.modality === 'CT' ? 'b-ct' : 'b-mri') + '">' + r.modality + '</span></td>' +
+      '<td><span class="badge ' + (MOD_BADGE[r.modality] || 'b-ct') + '">' + r.modality + '</span></td>' +
       '<td><div class="tag-wrap">' + protB + orB + '</div></td>' +
       '<td><div class="tag-wrap">' + issB + oiB + '</div></td>' +
       '<td style="color:var(--txt2);max-width:130px;word-break:break-word">' + (r.explanation || '—') + '</td>' +
