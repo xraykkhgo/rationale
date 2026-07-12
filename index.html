@@ -1,8 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Ask the LINE in-app browser to revalidate rather than serve a stale cached copy -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Imaging Rationale</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
@@ -97,6 +101,8 @@ textarea:focus{border-color:var(--bdr2);background:var(--card)}
 .s-br{background:var(--br-bg)!important;color:var(--br-txt)!important;border-color:var(--br-bdr)!important;font-weight:700!important}
 .s-fl{background:var(--fl-bg)!important;color:var(--fl-txt)!important;border-color:var(--fl-bdr)!important;font-weight:700!important}
 .s-fm{background:var(--fm-bg)!important;color:var(--fm-txt)!important;border-color:var(--fm-bdr)!important;font-weight:700!important}
+.s-appr{background:var(--ok-bg)!important;color:var(--ok-txt)!important;border-color:var(--ok-bdr)!important;font-weight:700!important}
+.s-decl{background:var(--flg-bg)!important;color:var(--flg-txt)!important;border-color:var(--flg-bdr)!important;font-weight:700!important}
 
 /* ── Referral unit grid ──────────────────────────────────────────────── */
 .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -279,6 +285,15 @@ tr:hover td{background:var(--bg2)}
     <p class="nc" id="nc">0 / 1000</p>
   </div>
 
+  <!-- ── Card 5: Examination approval consideration ────────────────────── -->
+  <div class="card">
+    <p class="card-hd">Examination approval consideration <span style="font-size:13px;font-weight:400;color:var(--txt3)">— optional</span></p>
+    <div class="mod-grid">
+      <button class="seg" id="apprY" onclick="selAppr('Approved')">Approved</button>
+      <button class="seg" id="apprN" onclick="selAppr('Declined')">Declined</button>
+    </div>
+  </div>
+
   <!-- ── Submit ────────────────────────────────────────────────────────── -->
   <button class="log-btn" id="lbtn" onclick="doLog()">Log case</button>
   <p id="fls"    style="display:none;text-align:center;padding:10px;font-size:15px;color:var(--ok-txt);font-weight:600">✓ Logged successfully</p>
@@ -378,6 +393,7 @@ let SI       = new Set();  // selected issues: "Category: sub-item" strings
 let lineName = '';          // from LIFF profile
 let ID_TOKEN = '';          // LINE ID token, sent to the backend for verification
 let liffLocked = false;     // true once the LINE identity locks the name field
+let approval = null;        // 'Approved' | 'Declined' | null — examination approval consideration
 
 // ── Backend API (fetch) ────────────────────────────────────────────────────────
 // GET  → GAS_URL?action=getRecords | getStats
@@ -615,6 +631,13 @@ function selM(m) {
   rRS(); upd();
 }
 
+// ── Examination approval consideration (tap to select, tap again to clear) ────
+function selAppr(v) {
+  approval = (approval === v) ? null : v;
+  document.getElementById('apprY').className = 'seg' + (approval === 'Approved' ? ' s-appr' : '');
+  document.getElementById('apprN').className = 'seg' + (approval === 'Declined' ? ' s-decl' : '');
+}
+
 function rRS() {
   var G = GG();
   document.getElementById('rpr').style.display = G ? 'none' : '';
@@ -806,6 +829,7 @@ async function doLog() {
     issues      : Array.from(SI),
     otherIssue  : (document.getElementById('oitxt').value.trim() || ''),
     explanation : (document.getElementById('expl').value.trim() || ''),
+    approval    : approval || '',
   };
 
   var btn = document.getElementById('lbtn');
@@ -839,6 +863,11 @@ async function doLog() {
       document.querySelectorAll('#rufgrid .ref-btn').forEach(function(b) {
         b.className = b.classList.contains('ref-full') ? 'ref-btn ref-full' : 'ref-btn';
       });
+
+      // Reset examination approval selection
+      approval = null;
+      document.getElementById('apprY').className = 'seg';
+      document.getElementById('apprN').className = 'seg';
 
       // Keep modality for faster consecutive entries; clear regions/issues
       SR.clear(); SI.clear();
